@@ -1,5 +1,7 @@
 #include "main.h"
 
+
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -79,58 +81,41 @@ void autonomous() {}
  }
 
 
-	void opcontrol() {
-		pros::Motor motor(1);
-		bool motorOn = true;
+void opcontrol() {
+	pros::Motor motor(1);
+	bool motorOn = true;	// flag for if conveyor motor is on or off
   pros::Controller master (pros::E_CONTROLLER_MASTER);
   while (true) {
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A) && motorOn == true ) {
+
+		//
+		// Handle toggleable conveyor
+		//
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))	// if A button is pressed
+		{
+			// if motor flag is true, change it to falce
+			if (motorOn)
+			{
 				motorOn = false;
-				pros::lcd::clear();
-			pros::lcd::set_text(2, "Motor Off");
+				pros::lcd::set_text(2, "Motor Off");
 				pros::delay(60);
-
+			}
+			else // if motor flag is false, change it to true
+			{
+				motorOn = true;
+				pros::lcd::set_text(2, "Motor On");
+				pros::delay(60);
+			}
 		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A) && motorOn == false ) {
-			motorOn = true;
-			pros::lcd::clear();
-			pros::lcd::set_text(2, "Motor On");
-			pros::delay(60);
-		}
-		if (motorOn == true)
 
-			master.clear();
+		// if motor flag is true, ensure motor is on
+		if (motorOn) {
 			motor.move(127);
-
 		}
-		if (motorOn == true) {
-			master.clear();
+
+		// if motor flag is false, ensure motor is off
+		if (!motorOn) {
 			motor.move(0);
 		}
-
-    }
-
-
-void drive() {
-
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(10);
-	pros::Motor bottomright_mtr(20);
-  pros::Motor bottomleft_mtr(11);
-	pros::Motor turn_mtr(1);
-	pros::Motor turn2_mtr(10);
-
-	while (true) {
-
-		int Ycontrol = master.get_analog(ANALOG_LEFT_Y);
-		int Xcontrol = master.get_analog(ANALOG_LEFT_X);
-
-		left_mtr = Ycontrol;
-		right_mtr = -Ycontrol;
-		bottomleft_mtr = Xcontrol;
-		bottomright_mtr = Xcontrol;
-		pros::delay(20);
 
 
 

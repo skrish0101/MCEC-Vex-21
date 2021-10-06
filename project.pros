@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "buttonpress2",
+        "project_name": "conveyorbelt",
         "target": "v5",
         "templates": {
             "kernel": {
