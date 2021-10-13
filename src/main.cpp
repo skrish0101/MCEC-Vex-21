@@ -1,6 +1,10 @@
 #include "main.h"
+#include <cmath>
 
-
+#define TOP_LEFT_WHEEL 6
+#define TOP_RIGHT_WHEEL 2
+#define BOTTOM_LEFT_WHEEL 3
+#define BOTTOM_RIGHT_WHEEL 5
 
 /**
  * A callback function for LLEMU's center button.
@@ -75,49 +79,69 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
- void testing() {
-
-	 pros::Motor motor(1);
- }
-
 
 void opcontrol() {
-	pros::Motor motor(1);
-	bool motorOn = true;	// flag for if conveyor motor is on or off
-  pros::Controller master (pros::E_CONTROLLER_MASTER);
-  while (true) {
+  pros::Controller master(pros::E_CONTROLLER_MASTER);
+
+	// the motors for the four wheels
+	pros::Motor top_left_wheel(TOP_LEFT_WHEEL);
+	pros::Motor top_right_wheel(TOP_RIGHT_WHEEL);
+	pros::Motor bottom_left_wheel(BOTTOM_LEFT_WHEEL);
+	pros::Motor bottom_right_wheel(BOTTOM_RIGHT_WHEEL);
+
+	// variables about moving the robot
+	int move_x = 0;	// x component of robot movement / controller joystick
+	int move_y = 0;	// y component of robot movement / controller joystick
+	double move_angle = 0;	// angle of robot movement / controller joystick with respect to positive x
+	int move_magnitude = 0;	// magnitude of robot movement / controller joystick
+	double top_left_volt = 0;
+	double top_right_volt = 0;
+	double bottom_left_volt = 0;
+	double bottom_right_volt = 0;
+
+	while (true) {
+
 
 		//
-		// Handle toggleable conveyor
+		// set the powers to the wheel motors
 		//
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))	// if A button is pressed
+
+		// get the x and y components from the controller joystick
+		move_x = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
+		move_y = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+
+		// calculate the angle and the magnitude of the controller joystick
+		move_angle = std::atan2(move_y, move_x);											// theta = atan(y/x)
+		move_magnitude = std::sqrt(pow(move_x, 2) + pow(move_y, 2));	// r = sqrt(x^2 + y^2)
+
+		// set voltage for wheels
+
+		// set voltage for top left wheel
+		if (std::abs(move_magnitude * std::sin(move_angle + M_PI/4) - top_left_volt) > 10)	// only if significantly different voltage
 		{
-			// if motor flag is true, change it to falce
-			if (motorOn)
-			{
-				motorOn = false;
-				pros::lcd::set_text(2, "Motor Off");
-				pros::delay(60);
-			}
-			else // if motor flag is false, change it to true
-			{
-				motorOn = true;
-				pros::lcd::set_text(2, "Motor On");
-				pros::delay(60);
-			}
+			top_left_volt = move_magnitude * std::sin(move_angle + M_PI/4);	// r*sin(theta + pi/4)
+			top_left_wheel.move(top_left_volt); 														// set voltage
 		}
 
-		// if motor flag is true, ensure motor is on
-		if (motorOn) {
-			motor.move(127);
+		// set voltage for top right wheel
+		if (std::abs(move_magnitude * std::sin(move_angle + 3*M_PI/4) - top_right_volt) > 10)	// only if significantly different voltage
+		{
+			top_right_volt = move_magnitude * std::sin(move_angle + 3*M_PI/4);	// r*sin(theta + pi/4)
+			top_right_wheel.move(top_right_volt); 															// set voltage
 		}
 
-		// if motor flag is false, ensure motor is off
-		if (!motorOn) {
-			motor.move(0);
+		// set voltage for bottom left wheel
+		if (std::abs(move_magnitude * std::sin(move_angle - M_PI/4) - bottom_left_volt) > 10)	// only if significantly different voltage
+		{
+			bottom_left_volt = move_magnitude * std::sin(move_angle - M_PI/4);	// r*sin(theta + pi/4)
+			bottom_left_wheel.move(bottom_left_volt); 													// set voltage
 		}
 
-
-
+		// set voltage for bottom right wheel
+		if (std::abs(move_magnitude * std::sin(move_angle - 3*M_PI/4) - bottom_right_volt) > 10)	// only if significantly different voltage
+		{
+			bottom_right_volt = move_magnitude * std::sin(move_angle - 3*M_PI/4);	// r*sin(theta + pi/4)
+			bottom_right_wheel.move(bottom_right_volt); 													// set voltage
+		}
 	}
 }
