@@ -81,31 +81,30 @@ void autonomous() {}
 
 	void opcontrol() {
 		pros::Motor motor(1);
-		bool motorOn = true;
+		bool motorOn = false;
   pros::Controller master (pros::E_CONTROLLER_MASTER);
   while (true) {
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A) && motorOn == true ) {
+			pros::lcd::set_text(2, "motorOff");
 				motorOn = false;
-				pros::lcd::clear();
-			pros::lcd::set_text(2, "Motor Off");
 				pros::delay(60);
 
 		}
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A) && motorOn == false ) {
+				pros::lcd::set_text(2, "motorOn");
 			motorOn = true;
-			pros::lcd::clear();
-			pros::lcd::set_text(2, "Motor On");
 			pros::delay(60);
 		}
 		if (motorOn == true)
-
-			master.clear();
 			motor.move(127);
 
+			pros::delay(60);
+
 		}
-		if (motorOn == true) {
-			master.clear();
+		if (motorOn == false) {
+
 			motor.move(0);
+					pros::delay(60);
 		}
 
     }
