@@ -17,6 +17,9 @@ public:
 	// given the vector of motion for the robot
 	void drive(double, double);
 
+	// drives robot while bot rotates at same time
+	void drive(double, double, double);
+
 	// if drive is called with a controller argument, get vector of motion from controller instead
 	void drive(pros::Controller);
 

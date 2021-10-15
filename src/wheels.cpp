@@ -26,11 +26,41 @@ void Wheels::drive(double move_x, double move_y)
   set_voltage(bottom_right, bottom_right_volt, move_magnitude * std::sin(move_angle - 3*M_PI/4)); // r*sin(theta-3pi/4)
 }
 
+// drives robot while bot rotates at same time
+void Wheels::drive(double move_x, double move_y, double rotation_factor)
+{
+  // calculate the angle and the magnitude of the controller joystick
+  double move_angle = std::atan2(move_y, move_x);											// theta = atan(y/x)
+  double move_magnitude = std::sqrt(pow(move_x, 2) + pow(move_y, 2));	// r = sqrt(x^2 + y^2)
+
+  // set voltage for wheels
+  // divide voltages derived for movement by 2 as half of possible voltage is allocated to rotation
+  set_voltage(top_left, top_left_volt,
+              (move_magnitude * std::sin(move_angle + M_PI/4))/2 + rotation_factor/2);    // r*sin(theta+pi/4)
+  set_voltage(top_right, top_right_volt,
+              (move_magnitude * std::sin(move_angle + 3*M_PI/4))/2 + rotation_factor/2);  // r*sin(theta+3pi/4)
+  set_voltage(bottom_left, bottom_left_volt,
+              (move_magnitude * std::sin(move_angle - M_PI/4))/2 + rotation_factor/2);    // r*sin(theta-pi/4)
+  set_voltage(bottom_right, bottom_right_volt,
+              (move_magnitude * std::sin(move_angle - 3*M_PI/4))/2 + rotation_factor/2);  // r*sin(theta-3pi/4)
+}
+
 // if drive is called with a controller argument, get vector of motion from controller instead
 void Wheels::drive(pros::Controller master)
 {
-  // pass in the x and y components of the left joystick as move_x and move_y in drive()
-  drive(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X), master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+  // if controller right joystick x has a significant value, we are rotating as well
+  if (abs(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)) > 5)
+  {
+    // pass in left joystick x and y as movement vector and right joystick x as rotation factor
+    drive(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X),
+                            master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y),
+                            master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+  } else {
+    // pass in the x and y components of the left joystick as move_x and move_y in drive()
+    drive(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X),
+          master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+  }
+
 }
 
 // set the wheel motors' voltage so that the hex bot rotates in place in the corresponding direction at a proportional speed

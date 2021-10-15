@@ -84,26 +84,9 @@ void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
 	Wheels hex_drive;
 
-	bool rotating = false;	// keeps track of whether hex bot is in drive or rotation movde
-
 	while (true)
 	{
-		// if B is pressed on controller, toggle rotating flag
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B))
-		{
-			// toggle rotating flag
-			if (rotating)
-				rotating = false;
-			else
-				rotating = true;
-		}
-
-		// if rotating flag is set true, rotate bot. else drive bot
-		if (rotating)
-		{
-			hex_drive.rotate(master);	// rotate bot using controller input
-		} else {
-			hex_drive.drive(master);	// drive bot using controller input
-		}
+		// move the hex bot using controller input
+		hex_drive.drive(master);
 	}
 }
